@@ -4,12 +4,12 @@ services:
     image: semtech/mu-identifier:1.3.0
     links:
       - dispatcher:dispatcher
-    ports:
-      - "80:80"
   dispatcher:
     image: semtech/mu-dispatcher:1.1.0
     links:
       - resource:resource
+      - classifier:classifier
+      - uploader:uploader
     volumes:
       - ./config/dispatcher:/config
   db:
@@ -27,3 +27,32 @@ services:
       - db:database
     volumes:
       - ./config/resources:/config
+  classifier:
+    image: flowofcontrol/mu-tf-image-classifier
+    links:
+      - db:database
+    environment:
+      CLASSIFIER_TRESHHOLD: 0.7
+    volumes:
+      - ./data/classifier/tf_files:/tf_files
+      - ./data/classifier/images:/images
+      - ./data/files:/files
+    ports:
+      - "6006:6006"
+  uploader:
+     image: flowofcontrol/file-uploader
+     links:
+       - db:database
+     volumes:
+       - ./data/files:/files
+  front:
+    image: semtech/ember-proxy-service
+    links:
+      - identifier:backend
+    volumes:
+      - ./front:/app
+      - ./data/classifier/images:/app/images
+    ports:
+      - "80:80"
+    environment:
+      STATIC_FOLDERS_REGEX: ^/(assets|font|images)/

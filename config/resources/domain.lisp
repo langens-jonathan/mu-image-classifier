@@ -25,6 +25,31 @@
 ;;   :resource-base (s-url "<string-to-which-uuid-will-be-appended-for-uri-of-new-items-in-triplestore>")
 ;;   :on-path "<url-path-on-which-this-resource-is-available>")
 
+(define-resource class ()
+  :class (s-prefix "ext:Class")
+  :properties `((:title :string ,(s-prefix "dct:title"))
+		(:description :string ,(s-prefix "dct:description")))
+  :has-many `((training-example :via ,(s-prefix "ext:hasTrainingExample")
+				:as "training-examples"))
+  :resource-base (s-url "http://example.com/image-recognition/classes")
+  :on-path "classes")
+
+(define-resource training-example ()
+  :class (s-prefix "ext:TrainingExample")
+  :has-one `((file :via ,(s-prefix "ext:hasFile")
+		   :as "file"))
+  :resource-base (s-url "http://example.com/image-recognition/traingin-examples")
+  :on-path "training-examples"
+  )
+
+(define-resource file ()
+  :class (s-prefix "file:File")
+  :properties `((:file-name :string ,(s-prefix "file:filename"))
+		(:original-filename :string ,(s-prefix "file:originalFilename"))
+		(:uploaded-at :string ,(s-prefix "file:uploadedAt"))
+		(:status :string ,(s-prefix "file:status")))
+  :resource-base (s-url "http://example.com/image-recognition/files")
+  :on-path "files")
 
 ;; An example setup with a catalog, dataset, themes would be:
 ;;
